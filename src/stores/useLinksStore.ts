@@ -22,18 +22,26 @@ export const useLinksStore = defineStore('linksStore', {
     unsubscribeLinks: null as (() => void) | null,
   }),
   actions: {
-    async subscribeToLinks() {
+    async subscribeToLinks(tag: null | string) {
       const authStore = useAuthStore();
 
       if (!await authStore.checkAuth()) {
         return;
       }
 
-      const q = query(
+      let q = query(
         collection(db, 'links'),
         where('userId', '==', authStore.currentUser.uid),
         orderBy('updatedAt', 'desc'),
       );
+
+      if (tag) {
+        q = query(q, where('tags', 'array-contains', tag));
+      }
+
+      if (this.unsubscribeLinks){
+        this.unsubscribeLinks();
+      }
 
       this.unsubscribeLinks = onSnapshot(q, (querySnapshot) => {
         this.links = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -66,7 +74,6 @@ export const useLinksStore = defineStore('linksStore', {
         snackbarStore.displayError(message);
       } finally {
         this.loading = false;
-        snackbarStore.displayMessage('Link added');
       }
     },
     async updateLink(linkId: string, updatedData: {
@@ -92,7 +99,6 @@ export const useLinksStore = defineStore('linksStore', {
         snackbarStore.displayError(message);
       } finally {
         this.loading = false;
-        snackbarStore.displayMessage('Link updated');
       }
     },
     async deleteLink(linkId: string) {
@@ -111,7 +117,6 @@ export const useLinksStore = defineStore('linksStore', {
         snackbarStore.displayError(message);
       } finally {
         this.loading = false;
-        snackbarStore.displayMessage('Link deleted');
       }
     },
   },

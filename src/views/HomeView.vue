@@ -3,17 +3,29 @@
   setup
 >
 import AddLinkForm from '@/components/AddLinkForm.vue';
+import LinkCard from '@/components/LinkCard.vue';
+import router from '@/router';
+import { useAuthStore } from '@/stores/useAuthStore.ts';
 import { useLinksStore } from '@/stores/useLinksStore.ts';
-import { onBeforeUnmount, onMounted } from 'vue';
+import { stringToColor } from '@/utils.ts';
+import { onBeforeUnmount, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 
 const { mdAndUp } = useDisplay();
 
+const authStore = useAuthStore();
 const linksStore = useLinksStore();
+const route = useRoute();
 
 onMounted(() => {
-  linksStore.subscribeToLinks();
+  linksStore.subscribeToLinks(route.query.tag);
 });
+
+watch(
+  () => route.query.tag,
+  (tag) => linksStore.subscribeToLinks(tag),
+);
 
 onBeforeUnmount(() => {
   linksStore.unsubscribeFromLinks();
@@ -27,7 +39,7 @@ onBeforeUnmount(() => {
       max-width="1500"
     >
       <div class="px-8">
-        <AddLinkForm />
+        <add-link-form />
       </div>
     </v-sheet>
     <v-expansion-panels v-else>
@@ -36,40 +48,30 @@ onBeforeUnmount(() => {
           Add
         </v-expansion-panel-title>
         <v-expansion-panel-text>
-          <AddLinkForm />
+          <add-link-form />
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <v-row class="mt-6">
+    <div class="mt-4 d-flex justify-center">
+      <v-chip
+        v-if="route.query.tag"
+        :text="route.query.tag"
+        :color="stringToColor(route.query.tag, authStore.theme)"
+        closable
+        @click:close="router.push('')"
+      />
+    </div>
+    <v-row class="mt-1">
       <v-col
         v-for="link in linksStore.links"
         :key="link.id"
         cols="12"
+        sm="6"
         md="4"
+        lg="3"
+        xl="2"
       >
-        <v-card rounded="xl" class="px-1 py-2">
-          <v-card-title>{{ link.title }}</v-card-title>
-          <v-card-subtitle>{{ link.link }}</v-card-subtitle>
-          <v-card-text>
-            <div>
-              <strong>Tags:</strong> {{ link.tags.join(', ') }}
-            </div>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn
-              color="primary"
-              @click="editLink(link.id)"
-            >
-              Edit
-            </v-btn>
-            <v-btn
-              color="error"
-              @click="linksStore.deleteLink(link.id)"
-            >
-              Delete
-            </v-btn>
-          </v-card-actions>
-        </v-card>
+        <link-card :link="link" />
       </v-col>
     </v-row>
   </v-container>
