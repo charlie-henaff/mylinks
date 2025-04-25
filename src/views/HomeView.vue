@@ -2,17 +2,15 @@
   lang="ts"
   setup
 >
-import AddLinkForm from '@/components/AddLinkForm.vue';
-import LinkCard from '@/components/LinkCard.vue';
+import LinkCard from '@/components/Card/LinkCard.vue';
+import AddLinkForm from '@/components/Form/AddLinkForm.vue';
+import MasonryLayout from '@/components/Layout/MasonryLayout.vue';
 import router from '@/router';
 import { useAuthStore } from '@/stores/useAuthStore.ts';
 import { useLinksStore } from '@/stores/useLinksStore.ts';
 import { stringToColor } from '@/utils.ts';
 import { onBeforeUnmount, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { useDisplay } from 'vuetify';
-
-const { mdAndUp } = useDisplay();
 
 const authStore = useAuthStore();
 const linksStore = useLinksStore();
@@ -34,45 +32,32 @@ onBeforeUnmount(() => {
 
 <template>
   <v-container>
-    <v-sheet
-      v-if="mdAndUp"
-      max-width="1500"
-    >
-      <div class="px-8">
-        <add-link-form />
-      </div>
-    </v-sheet>
-    <v-expansion-panels v-else>
-      <v-expansion-panel>
-        <v-expansion-panel-title>
-          Add
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <add-link-form />
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
-    <div class="mt-4 d-flex justify-center">
-      <v-chip
-        v-if="route.query.tag"
-        :text="route.query.tag"
-        :color="stringToColor(route.query.tag, authStore.theme)"
-        closable
-        @click:close="router.push('')"
-      />
+    <div class="py-4">
+      <add-link-form />
     </div>
-    <v-row class="mt-1">
-      <v-col
-        v-for="link in linksStore.links"
-        :key="link.id"
-        cols="12"
-        sm="6"
-        md="4"
-        lg="3"
-        xl="2"
+    <v-expand-transition>
+      <div
+        v-if="route.query.tag"
+        class="d-flex justify-center align-center py-4"
       >
-        <link-card :link="link" />
-      </v-col>
-    </v-row>
+        <span class="me-2">Filters:</span>
+        <v-chip
+          :text="route.query.tag"
+          :color="stringToColor(route.query.tag, authStore.theme)"
+          closable
+          @click:close="router.push('')"
+        />
+      </div>
+    </v-expand-transition>
+    <div class="py-4">
+      <masonry-layout
+        :items="linksStore.links"
+        :getKey="(item) => item.id"
+      >
+        <template #default="{ item }">
+          <link-card :link="item" />
+        </template>
+      </masonry-layout>
+    </div>
   </v-container>
 </template>

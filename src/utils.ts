@@ -15,6 +15,28 @@ export function isValidUrl(url: string) {
   return urlPattern.test(url.trim());
 }
 
+export function isYouTubeUrl(url?: string): boolean {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+
+    const isYouTubeHost = [
+      'youtube.com',
+      'www.youtube.com',
+      'youtu.be',
+      'm.youtube.com',
+    ].includes(parsed.hostname);
+
+    const isWatchUrl = parsed.pathname === '/watch' && parsed.searchParams.has('v');
+    const isShortUrl = parsed.hostname === 'youtu.be' && parsed.pathname.length > 1;
+
+    return isYouTubeHost && (isWatchUrl || isShortUrl);
+  } catch {
+    return false;
+  }
+}
+
 export function httpsUrl(url: string) {
   if (url && !/^https?:\/\//i.test(url.trim())) {
     return `https://${url.trim()}`;

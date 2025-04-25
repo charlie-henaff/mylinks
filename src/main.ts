@@ -26,7 +26,7 @@ app.use(createVuetify({
     themes: {
       light: {
         colors: {
-          background: colors.grey.lighten4
+          background: colors.grey.lighten4,
         },
       },
     },

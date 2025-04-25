@@ -53,7 +53,7 @@ export const useLinksStore = defineStore('linksStore', {
         this.unsubscribeLinks = null;
       }
     },
-    async addLink(linkData: { title: string, link: string, tags: string[] }) {
+    async addLink(linkData: { link: string, tags: string[] }) {
       const authStore = useAuthStore();
       const snackbarStore = useSnackBarStore();
 
@@ -77,8 +77,7 @@ export const useLinksStore = defineStore('linksStore', {
       }
     },
     async updateLink(linkId: string, updatedData: {
-      title?: string,
-      link?: string,
+      url?: string,
       tags?: string[]
     }) {
       const authStore = useAuthStore();
