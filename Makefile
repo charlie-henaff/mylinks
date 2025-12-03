@@ -30,6 +30,14 @@ lint: ## Lint app
 	@${RUN_APP} npm run lint
 
 ##
+## —— Deploy ———————————————————————————————————————————————————————————
+
+.PHONY: deploy
+deploy: package-lock.json lint ## Deploy app
+	@${RUN_APP} npm run build-only
+	@{RUN_APP} npm run deploy
+
+##
 ## —— Utilities ————————————————————————————————————————————————————————————————
 
 .PHONY: sh
